@@ -17,8 +17,8 @@ async function main() {
   say("");
 
   const prompt =
-    `My name is ${name} and I am from ${town}. Create a limerick about me.`;
+    `My name is ${name} and I am from ${town}. Create a haiku about me.`;
 
-  const limerick = await gptPrompt(prompt, { temperature: 0.7 });
-  say(`"""\n${limerick}\n"""`);
+  const haiku = await gptPrompt(prompt, { temperature: 0.7 });
+  say(`"""\n${haiku}\n"""`);
 }
