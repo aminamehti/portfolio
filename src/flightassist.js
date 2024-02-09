@@ -2,10 +2,11 @@
 import flights from "./shared/flight.json" assert { type: "json" };
 import { gptPrompt } from "./shared/openai.js";
 import { ask, say } from "./shared/cli.js";
+import { env } from "node:process";
 
 // Function to fetch flight data from an API
 async function fetchFlightData(departure, destination, date) {
-  const apiKey = "65c6916360d9bb7f0828fdcd"; // Your actual API key
+  const apiKey = env.FLIGHT_API_KEY; // Your actual API key
   // Adjust the URL according to your API requirements
   const url =
     `https://api.flightapi.io/oneway/${apiKey}/${departure}/${destination}/${date}/1/0/0/Economy/USD`;
