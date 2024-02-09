@@ -6,16 +6,16 @@ import { env } from "node:process";
 
 // Function to fetch flight data from an API
 async function fetchFlightData(departure, destination, date) {
-  const apiKey = env.FLIGHT_API_KEY; // Your actual API key
+  const flight_apiKey = env.FLIGHT_API_KEY; // Your actual API key
   // Adjust the URL according to your API requirements
   const url =
-    `https://api.flightapi.io/oneway/${apiKey}/${departure}/${destination}/${date}/1/0/0/Economy/USD`;
+    `https://api.flightapi.io/oneway/${flight_apiKey}/${departure}/${destination}/${date}/1/0/0/Economy/USD`;
 
   try {
     const response = await fetch(url, {
       method: "GET", // Adjust if necessary
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${flight_apiKey}`,
         "Content-Type": "application/json",
       },
     });
