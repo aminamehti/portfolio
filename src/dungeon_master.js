@@ -33,17 +33,17 @@ async function main() {
     }
 
     const prompt = `
-  This is a text adventure game.
+  This is a text adventure game. 
   The player is a ${player.class} named ${player.name}.
   The current setting is ${location}.
  
   Recently: ${context.slice(-3).join(" ")}
 
-  Respond in second person.
-  Be breif, and avoid narating actions not taken by the player via commands.
+  Respond in third person. Have a casual tone in your response, and also use GenZ slang.
+  Be brief, and avoid narating actions not taken by the player via commands.
   When describing locations mention places the player might go.
 
-  
+
 
   The player command is '${command}'. 
   `;
