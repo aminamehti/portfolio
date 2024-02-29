@@ -1,84 +1,64 @@
 // Import the JSON data from the file
-import flights from "./shared/flight.json" assert { type: "json" };
 import { gptPrompt } from "./shared/openai.js";
 import { ask, say } from "./shared/cli.js";
-import { env } from "node:process";
 
-// Function to fetch flight data from an API
-async function fetchFlightData(departure, destination, date) {
-  const flight_apiKey = env.FLIGHT_API_KEY; // Your actual API key
-  // Adjust the URL according to your API requirements
-  const url =
-    `https://api.flightapi.io/oneway/${flight_apiKey}/${departure}/${destination}/${date}/1/0/0/Economy/USD`;
+// Function to query ChatGPT via OpenAI's API
+async function queryChatGPT(prompt) {
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) {
+    console.error("OPENAI_API_KEY environment variable is not set.");
+    return null;
+  }
+
+  console.log("Sending request to OpenAI...");
 
   try {
-    const response = await fetch(url, {
-      method: "GET", // Adjust if necessary
-      headers: {
-        "Authorization": `Bearer ${flight_apiKey}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const data = await response.json();
-    return data; // This will be the flight data
-  } catch (error) {
-    console.error("There was a problem with your fetch operation:", error);
-  }
-}
-
-// Function to query ChatGPT using OpenAI's API
-async function queryChatGPT(promptText) {
-  const apiKey = env.OPENAI_API_KEY;
-  const response = await fetch(
-    "https://api.openai.com/v1/engines/davinci/completions",
-    {
+    const response = await fetch("https://api.openai.com/v1/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        prompt: promptText,
-        max_tokens: 150,
+        model: "gpt-4.0-turbo",
+        prompt: prompt,
+        max_tokens: 1200,
+        temperature: 0.7,
       }),
-    },
-  );
+    });
 
-  if (response.ok) {
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(
+        `OpenAI API request was not ok. Status code: ${response.status}, Body: ${errorBody}`,
+      );
+    }
+
     const data = await response.json();
     return data.choices[0].text.trim();
-  } else {
-    const error = await response.text();
-    throw new Error(`API request failed: ${error}`);
+  } catch (error) {
+    console.error("There was a problem with your fetch operation:", error);
+    return null;
   }
 }
 
-// Main function to tie everything together
 async function main() {
-  say("Welcome to the Flight Information Assistant");
-  const departure = await ask(
-    "Enter your departure airport code (e.g., LAX): ",
+  console.log("Welcome to the QuickJet Information Assistant");
+  const departureDate = await ask(
+    "Enter your departure date (For example: 2024-05-20): ",
   );
-  const destination = await ask(
-    "Enter your destination airport code (e.g., JFK): ",
+  const departureLocation = await ask(
+    "Enter your departure location (For example: LAX): ",
   );
-  const date = await ask("Enter your departure date (YYYY-MM-DD): ");
+  const destinationLocation = await ask(
+    "Enter your destination location (For example: JFK): ",
+  );
 
-  const flightData = await fetchFlightData(departure, destination, date);
-  if (flightData) {
-    const prompt = `Summarize the following flight itinerary details: ${
-      JSON.stringify(flightData, null, 2)
-    }`;
-    const summary = await queryChatGPT(prompt);
-    say(`Flight Summary from ChatGPT: ${summary}`);
-  } else {
-    say("Failed to fetch flight data.");
-  }
+  const prompt =
+    `Provide information for flights from ${departureLocation} to ${destinationLocation} on ${departureDate}.`;
+
+  const response = await queryChatGPT(prompt);
+  console.log("Here's what I found:", response);
 }
 
-main();
+main().catch(console.error);
