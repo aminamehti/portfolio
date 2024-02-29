@@ -28,15 +28,17 @@ async function main() {
     if (command === "predict") {
       const result = await gptPrompt(
         `Predict the price volatility for a flight from ${player.departure} to ${player.arrival} on ${player.date}. 
-        Give an output of approximate dates and the range of cost in best case and worst case scenario. Do not mention your limitations as an AI. Do not mention anythign about how flight prices are predicted in the final answer. 
+        Give an output of approximate dates and the range of cost in best case and worst case scenario. Do not mention your limitations as an AI. Do not mention anything about how flight prices are predicted in the final answer. 
         Just provide the estimations. 
       `,
         { temperature: 0.3 },
       );
       console.log(result);
     } else if (command === "book") {
-      // Simulate booking process
       say("Searching for flights...");
+      say(
+        "Below is a list of top 5 flights to your destination (based on price and travel time)",
+      );
       const flights = [
         "Flight 1",
         "Flight 2",
@@ -45,44 +47,48 @@ async function main() {
         "Flight 5",
       ];
       flights.forEach((flight, index) => say(`${index + 1}. ${flight}`));
+
       const flightChoice = await ask(
         "Which flight would you like to book? (Enter number)",
       );
-      say(
-        `You've selected ${
-          flights[parseInt(flightChoice, 10) - 1]
-        }. Booking your flight...`,
+
+      let validCard = false;
+      while (!validCard) {
+        const creditCard = await ask(
+          "Please enter your credit card information (16 digits)",
+        );
+        if (/^\d{16}$/.test(creditCard)) {
+          validCard = true;
+          say(
+            `You've selected ${
+              flights[parseInt(flightChoice, 10) - 1]
+            }. Booking your flight...`,
+          );
+          say(
+            `Your purchase was successful! Thank you for booking a flight to ${player.arrival} on ${player.date}.`,
+          );
+        } else {
+          say(
+            "Invalid credit card number. Please make sure you enter a 16 digit number.",
+          );
+        }
+      }
+
+      const anotherBooking = await ask(
+        "Would you like to book another flight? (yes/no)",
       );
+      if (anotherBooking.toLowerCase() === "yes") {
+        player.departure = await ask("Enter your departure location");
+        player.arrival = await ask("Enter your arrival location");
+        player.date = await ask(
+          "Enter your preferred travel date (YYYY-MM-DD)",
+        );
+      } else {
+        booking = false;
+        say("Thank you for using the QuickJet Booker. Goodbye!");
+      }
     } else {
       say("Invalid command. Please type 'predict', 'book', or 'quit'.");
     }
   }
-}
-
-async function fetchOpenAIPrediction(promptText) {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) {
-    throw new Error("OpenAI API key is not set in environment variables.");
-  }
-
-  const response = await fetch("https://api.openai.com/v1/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "text-davinci-003",
-      prompt: promptText,
-      temperature: 0.7,
-      max_tokens: 1150,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch from OpenAI: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.choices[0].text.trim();
 }
