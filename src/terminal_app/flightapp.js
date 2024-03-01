@@ -1,5 +1,5 @@
-import { gptPrompt } from "./shared/openai.js";
-import { ask, say } from "./shared/cli.js";
+import { gptPrompt } from "../shared/openai.js";
+import { ask, say } from "../shared/cli.js";
 
 main();
 
@@ -79,7 +79,7 @@ async function bookFlight(player) {
       const creditCard = await ask(
         "Please enter your credit card information (16 digits)",
       );
-      if (/^\d{16}$/.test(creditCard)) {
+      if (creditCard.length === 16) {
         validCard = true;
         say(
           `You've selected ${
