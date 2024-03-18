@@ -1,5 +1,5 @@
-import { gptPrompt } from "./shared/openai.js";
-import { ask, say } from "./shared/cli.js";
+import { gptPrompt } from "../shared/openai.js";
+import { ask, say } from "../shared/cli.js";
 import chalk from "npm:chalk@5.3.0";
 import boxen from "https://esm.sh/boxen@6";
 import { Select } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
