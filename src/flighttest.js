@@ -14,15 +14,21 @@ async function main() {
   //Collect user info
   let booking = true;
   const player = {};
-  player.departure = await ask(
-    chalk.blueBright("Enter your departure location (e.g. JFK)"),
-  );
-  player.arrival = await ask(
-    chalk.blueBright("Enter your arrival location (e.g. LAX)"),
-  );
-  player.date = await ask(
-    chalk.blueBright("Enter your preferred travel date (YYYY-MM-DD)"),
-  );
+  while (!player.departure || player.departure.length !== 3 || !isUpperCase(player.departure)) {
+    player.departure = await ask(chalk.blueBright("Enter your departure location (e.g. JFK)"));
+    if (player.departure.length !== 3 || !isUpperCase(player.departure)) showError();
+  }
+
+  while (!player.arrival || player.arrival.length !== 3|| !isUpperCase(player.arrival)) {
+    player.arrival = await ask(chalk.blueBright("Enter your arrival location (e.g. LAX)"));
+    if (player.arrival.length !== 3) showError();
+  }
+
+  while (!player.date || !isValidDate(player.date)) {
+    player.date = await ask(chalk.blueBright("Enter your preferred travel date (YYYY-MM-DD)"));
+    if (!isValidDate(player.date)) showError();
+  }
+
 
   say("");
 
@@ -190,4 +196,16 @@ async function searchFlights(departDate, departureCode, arrivalCode) {
     );
     //throw  error; if you recieve API error, code this to see it
   }
+}
+
+function isUpperCase(str) {
+  return str === str.toUpperCase();
+}
+
+function isValidDate(date) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+function showError() {
+  say(chalk.redBright("The information you have entered is invalid, please try again"));
 }
