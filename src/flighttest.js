@@ -47,7 +47,9 @@ async function main() {
 
   while (booking) {
     const command = await Select.prompt({
-      message: "Would you like to predict price volatility or book a flight?",
+      message: chalk.cyanBright(
+        "Would you like to predict price volatility or book a flight?",
+      ),
       options: [
         { name: "Predict price volatility", value: "predict" },
         { name: "Book a flight", value: "book" },
@@ -71,7 +73,11 @@ async function main() {
                 Just provide the estimations. Without changing the layout of your response, add a sentence at the end that says these numbers are an estimation and as an AI you make mistakes.`,
         { temperature: 0.3 },
       );
-      console.log(result);
+      say(boxen(chalk.yellow(result), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+      }));
     } else if (command === "book") {
       await bookFlight(player);
     } else {
@@ -100,17 +106,36 @@ async function bookFlight(player) {
     for (let i = 0; i < Math.min(3, flights.length); i++) {
       const flight = flights[i];
       say(
-        `Flight ${i + 1}: Price ${flight.price.currencyCode} ${
-          parseFloat(flight.price.units + "." + flight.price.nanos).toFixed(2)
-        }`,
+        boxen(
+          chalk.yellow(
+            `Flight ${i + 1}: Price ${flight.price.currencyCode} ${
+              parseFloat(flight.price.units + "." + flight.price.nanos).toFixed(
+                2,
+              )
+            }`,
+          ),
+          {
+            padding: 1,
+            margin: 1,
+            borderStyle: "round",
+          },
+        ),
       );
     }
 
     // If less than 3 flights are available, message for the remaining options
     for (let i = flights.length; i < 3; i++) {
-      say(`Flight ${i + 1}: No available flight for this option`);
+      say(
+        boxen(
+          chalk.yellow(`Flight ${i + 1}: No available flight for this option`),
+          {
+            padding: 1,
+            margin: 1,
+            borderStyle: "round",
+          },
+        ),
+      );
     }
-
     let validChoice = false;
     while (!validChoice) {
       const flightChoice = await ask(
