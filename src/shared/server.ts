@@ -5,7 +5,6 @@ import { type Next } from "https://deno.land/x/oak@14.2.0/middleware.ts";
 
 // Serve static files from public directory
 export async function staticServer(context: Context, next: Next) {
-  const path = context.request.url.pathname;
   try {
     await context.send({
       root: `${Deno.cwd()}/public`,
