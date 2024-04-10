@@ -2,13 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Image for Improvement</title>
+    <title>Interactive Story Creator</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f0db4f;
+        }
+        input, button, select {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 400px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .story-box {
+            border: 2px solid #333;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #fff;
+            color: #333;
+            text-align: center;
+            width: 50%;
+        }
+    </style>
 </head>
 <body>
-    <form action="http://localhost:8000/" method="post" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
-        <button type="submit">Upload Image</button>
-    </form>
+    <h1>Interactive Story Creator</h1>
+    <input id="storyInput" type="text" placeholder="Start your story idea here">
+    <button id="startButton">Start Story</button>
+    <div id="storyBox" class="story-box"></div>
+    <script>
+      const storyInputElement = document.getElementById("storyInput");
+      const startButtonElement = document.getElementById("startButton");
+      const storyBoxElement = document.getElementById("storyBox");
+
+      startButtonElement.addEventListener("click", () => {
+        const storyStart = storyInputElement.value;
+        fetchStoryline(storyStart, "");
+      });
+
+      function fetchStoryline(story, direction) {
+        fetch(`/api/story?prompt=${story}&direction=${direction}`)
+        .then(response => response.json())
+        .then(data => {
+          storyBoxElement.innerText = data.story; // Display the current part of the story
+          // Optionally, add controls for the user to influence the next part of the story
+        })
+        .catch(error => console.error('Error:', error));
+      }
+    </script>
 </body>
 </html>
