@@ -2,78 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome Journalist!</title>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: rgb(162, 255, 112);
-        }
-        input, button {
-            margin: 10px 5px;
-            padding: 10px;
-            font-size: 16px;
-            width: 400px; /* Adjusted width */
-        }
-        button {
-            width: auto; /* Reset button width to auto to avoid stretching */
-            background-color: rgb(255, 65, 220);
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .center-box {
-            border: 2px solid rgb(230, 0, 255);
-            padding: 20px;
-            display: inline-block;
-            background-color: rgba(255, 255, 255, 0);
-            text-align: center;
-        }
-        h1 {
-            color: white;
-            text-shadow: -1px -1px 0 #ff1ed9, 1px -1px 0 #ff1ed9, -1px 1px 0 #ff1ed9, 1px 1px 0 #ff1ed9;
-        }
-        .answer-box {
-            border: 2px solid rgb(230, 0, 255);
-            padding: 10px;
-            margin-top: 10px;
-            display: inline-block;
-            background-color: rgba(255, 255, 255, 0.5);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image for Improvement</title>
 </head>
 <body>
-    <div class="center-box">
-        <h1>Welcome Journalist!</h1>
-        <p>Tell us your idea for a story, and AI will give you feedback.</p> 
-        <input id="prompt" type="text" placeholder="Your story idea here" />
-        <button id="send">Send</button>
-    </div>
-    <script>
-      const promptElement = document.getElementById("prompt");
-      const sendElement = document.getElementById("send");
-
-      sendElement.addEventListener("click", () => {
-        fetch("/api/gpt", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ storyIdea: promptElement.value })
-        })
-        .then(response => response.json())
-        .then(data => {
-          const responseElement = document.createElement("p");
-          responseElement.className = "answer-box";
-          responseElement.innerText = data.response;
-          document.body.appendChild(responseElement);
-        })
-        .catch(error => console.error('Error:', error));
-      });
-    </script>
+    <form action="http://localhost:8000/" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Upload Image</button>
+    </form>
 </body>
 </html>

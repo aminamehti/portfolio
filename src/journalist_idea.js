@@ -8,20 +8,20 @@ const chalk = new Chalk({ level: 1 });
 const app = new Application();
 const router = new Router();
 
-router.post("/api/gpt", async (ctx) => {
-  const request = await ctx.request.body({ type: "json" });
-  const { storyIdea } = request.value;
-  
-    
-  const customPrompt = `This is an idea for a story submitted by a journalist: "${storyIdea}". Provide feedback by listing the top 5 suggestions in a list, of how this story idea can be improved.`;
-console.log(customPrompt);
+router.get("/api/gpt", async (ctx) => {
+  const storyIdea = ctx.request.url.searchParams.get("prompt");
+
+  const customPrompt =
+    `This is an idea for a story submitted by a journalist: "${storyIdea}". Provide short and conscise feedback by listing the top 3 suggestions of how this story idea can be improved. Do not make any text bold.`;
   try {
     const result = await gptPrompt(customPrompt);
     ctx.response.body = { response: result };
   } catch (error) {
-    console.error('Error processing GPT request:', error);
+    console.error("Error processing GPT request:", error);
     ctx.response.status = 500;
-    ctx.response.body = { response: "Failed to get feedback from AI. Please try again." };
+    ctx.response.body = {
+      response: "Failed to get feedback from AI. Please try again.",
+    };
   }
 });
 

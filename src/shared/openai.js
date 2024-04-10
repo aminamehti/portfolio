@@ -35,7 +35,7 @@ const models = {
 const defaults = {
   frequency_penalty: 0,
   logit_bias: {},
-  max_tokens: 128,
+  max_tokens: 2228,
   n: 1,
   presence_penalty: 0,
   response_format: { type: "text" },
