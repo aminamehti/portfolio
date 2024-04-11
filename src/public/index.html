@@ -33,6 +33,11 @@
             color: #333;
             text-align: center;
             width: 50%;
+            overflow-y: auto; /* Allow scrolling for long stories */
+            max-height: 400px; /* Set a max height */
+        }
+        .story-part {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -49,14 +54,19 @@
       startButtonElement.addEventListener("click", () => {
         const storyStart = storyInputElement.value;
         fetchStoryline(storyStart, "");
+        // Clear the input after fetching the story
+        storyInputElement.value = "";
       });
 
       function fetchStoryline(story, direction) {
-        fetch(`/api/story?prompt=${story}&direction=${direction}`)
+        const url = `/api/story?prompt=${encodeURIComponent(story)}&direction=${encodeURIComponent(direction)}`;
+        fetch(url)
         .then(response => response.json())
         .then(data => {
-          storyBoxElement.innerText = data.story; // Display the current part of the story
-          // Optionally, add controls for the user to influence the next part of the story
+          const storyPartElement = document.createElement("div");
+          storyPartElement.className = "story-part";
+          storyPartElement.innerText = data.story; // Display the current part of the story
+          storyBoxElement.appendChild(storyPartElement); // Append the new story part
         })
         .catch(error => console.error('Error:', error));
       }

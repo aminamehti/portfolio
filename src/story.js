@@ -1,4 +1,5 @@
 import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
+import { gptPrompt } from "./shared/openai.js"; // Adjust the import path as needed
 import * as log from "./shared/logger.ts";
 log.setLogLevel(log.LogLevel.DEBUG);
 
@@ -8,18 +9,25 @@ const chalk = new Chalk({ level: 1 });
 const app = new Application();
 const router = new Router();
 
-// Simulated function to generate a storyline based on the prompt and direction
-async function generateStoryline(prompt, direction) {
-  // This is where you'd integrate with an AI service or your own story generation logic
-  return `Generated story part based on: ${prompt} and direction: ${direction}`;
-}
-
+// Route handler adjusted to use the gptPrompt function
 router.get("/api/story", async (ctx) => {
   const prompt = ctx.request.url.searchParams.get("prompt") || "";
-  const direction = atx.request.url.searchParams.get("direction") || "";
-  const storyPart = await generateStoryline(prompt, direction);
-  ctx.response.body = { story: storyPart };
+  const direction = ctx.request.url.searchParams.get("direction") || "";
+  // Combine prompt and direction into a single string
+  const combinedPrompt = `Story idea: ${prompt}. Direction: ${direction}.`;
+
+  try {
+    // Call gptPrompt to generate the story part based on the combined prompt
+    const storyPart = await gptPrompt(combinedPrompt);
+    ctx.response.body = { story: storyPart.trim() }; // Ensure response is properly formatted
+  } catch (error) {
+    // Log the error and return an error message
+    log.error("Error generating story: ", error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Failed to generate story" };
+  }
 });
+
 // Serve static files - adjust paths as necessary
 app.use(async (ctx, next) => {
   if (ctx.request.url.pathname.startsWith("/api")) {
@@ -28,11 +36,12 @@ app.use(async (ctx, next) => {
   } else {
     // Attempt to serve static files, defaulting to index.html for the root
     await send(ctx, ctx.request.url.pathname, {
-      root: `${Deno.cwd()}/public`,      
+      root: `${Deno.cwd()}/public`,
       index: "index.html",
     });
   }
 });
+
 app.use(router.routes());
 app.use(router.allowedMethods());
 
