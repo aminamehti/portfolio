@@ -24,8 +24,12 @@
             color: white;
             border: none;
             cursor: pointer;
+            display: none; /* Initially hide all buttons except Start Story */
         }
-        .story-box {
+        #startButton {
+            display: block; /* Show only the Start button initially */
+        }
+        .story-box, .continue-story-box {
             border: 2px solid #333;
             padding: 20px;
             margin-top: 20px;
@@ -33,8 +37,8 @@
             color: #333;
             text-align: center;
             width: 50%;
-            overflow-y: auto; /* Allow scrolling for long stories */
-            max-height: 400px; /* Set a max height */
+            overflow-y: auto;
+            max-height: 400px;
         }
         .story-part {
             margin-bottom: 20px;
@@ -46,29 +50,71 @@
     <input id="storyInput" type="text" placeholder="Start your story idea here">
     <button id="startButton">Start Story</button>
     <div id="storyBox" class="story-box"></div>
+    <button id="continueButton">Continue Story</button>
+    <div id="continueStoryBox" class="continue-story-box"></div>
+    <button id="mainPlotButton">Main Plot Events</button>
+    <div id="mainPlotBox" class="continue-story-box"></div>
+    <button id="fallingActionButton">Falling Action</button>
+    <div id="fallingActionBox" class="continue-story-box"></div>
+    <button id="conclusionButton">Conclusion</button>
+    <div id="conclusionBox" class="continue-story-box"></div>
+
     <script>
       const storyInputElement = document.getElementById("storyInput");
       const startButtonElement = document.getElementById("startButton");
+      const continueButtonElement = document.getElementById("continueButton");
+      const mainPlotButtonElement = document.getElementById("mainPlotButton");
+      const fallingActionButtonElement = document.getElementById("fallingActionButton");
+      const conclusionButtonElement = document.getElementById("conclusionButton");
       const storyBoxElement = document.getElementById("storyBox");
+      const continueStoryBoxElement = document.getElementById("continueStoryBox");
+      const mainPlotBoxElement = document.getElementById("mainPlotBox");
+      const fallingActionBoxElement = document.getElementById("fallingActionBox");
+      const conclusionBoxElement = document.getElementById("conclusionBox");
 
       startButtonElement.addEventListener("click", () => {
         const storyStart = storyInputElement.value;
-        fetchStoryline(storyStart, "");
-        // Clear the input after fetching the story
+        fetchStoryline(storyStart, "", true, continueButtonElement, storyBoxElement);
         storyInputElement.value = "";
       });
 
-      function fetchStoryline(story, direction) {
+      continueButtonElement.addEventListener("click", () => {
+        const currentStory = document.querySelector(".story-part").innerText;
+        fetchStoryline(currentStory, "Continue with the rising action.", false, mainPlotButtonElement, continueStoryBoxElement);
+      });
+
+      mainPlotButtonElement.addEventListener("click", () => {
+        const currentStory = continueStoryBoxElement.innerText;
+        fetchStoryline(currentStory, "Continue with the main plot events.", false, fallingActionButtonElement, mainPlotBoxElement);
+      });
+
+      fallingActionButtonElement.addEventListener("click", () => {
+        const currentStory = mainPlotBoxElement.innerText;
+        fetchStoryline(currentStory, "Continue with the falling action.", false, conclusionButtonElement, fallingActionBoxElement);
+      });
+
+      conclusionButtonElement.addEventListener("click", () => {
+        const currentStory = fallingActionBoxElement.innerText;
+        fetchStoryline(currentStory, "Provide the conclusion.", false, null, conclusionBoxElement);
+      });
+
+      function fetchStoryline(story, direction, isFirstCall, nextButtonElement, targetElement) {
         const url = `/api/story?prompt=${encodeURIComponent(story)}&direction=${encodeURIComponent(direction)}`;
         fetch(url)
         .then(response => response.json())
         .then(data => {
           const storyPartElement = document.createElement("div");
           storyPartElement.className = "story-part";
-          storyPartElement.innerText = data.story; // Display the current part of the story
-          storyBoxElement.appendChild(storyPartElement); // Append the new story part
+          storyPartElement.innerText = data.story;
+          targetElement.appendChild(storyPartElement);
+          if (nextButtonElement) {
+            nextButtonElement.style.display = "block"; // Show the next stage button
+          }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+          console.error('Error:', error);
+          alert("Failed to load the story. Please check the console for more details.");
+        });
       }
     </script>
 </body>
