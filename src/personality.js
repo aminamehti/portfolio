@@ -1,4 +1,4 @@
-import { gptPrompt } from "./shared/openai.js";
+import { gptPrompt } from "./shared/openai.ts";
 import { ask, say } from "./shared/cli.js";
 
 async function personalityTest() {

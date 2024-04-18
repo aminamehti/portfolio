@@ -1,121 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Interactive Story Creator</title>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: #f0db4f;
-        }
-        input, button, select {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
-            width: 400px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: none; /* Initially hide all buttons except Start Story */
-        }
-        #startButton {
-            display: block; /* Show only the Start button initially */
-        }
-        .story-box, .continue-story-box {
-            border: 2px solid #333;
-            padding: 20px;
-            margin-top: 20px;
-            background-color: #fff;
-            color: #333;
-            text-align: center;
-            width: 50%;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-        .story-part {
-            margin-bottom: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Interactive Story Generator</title>
+<style>
+    body { font-family: Arial, sans-serif; }
+    #storyOutput { margin-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #ccc; }
+    button { margin-right: 10px; }
+</style>
 </head>
 <body>
-    <h1>Interactive Story Creator</h1>
-    <input id="storyInput" type="text" placeholder="Start your story idea here">
-    <button id="startButton">Start Story</button>
-    <div id="storyBox" class="story-box"></div>
-    <button id="continueButton">Continue Story</button>
-    <div id="continueStoryBox" class="continue-story-box"></div>
-    <button id="mainPlotButton">Main Plot Events</button>
-    <div id="mainPlotBox" class="continue-story-box"></div>
-    <button id="fallingActionButton">Falling Action</button>
-    <div id="fallingActionBox" class="continue-story-box"></div>
-    <button id="conclusionButton">Conclusion</button>
-    <div id="conclusionBox" class="continue-story-box"></div>
+<h1>Interactive Story Generator</h1>
+<label for="storyInput">Enter your story idea:</label>
+<input type="text" id="storyInput" placeholder="Start typing..." size="50">
+<button onclick="startStory()">Generate Story</button>
+<div id="storyOutput"></div>
 
-    <script>
-      const storyInputElement = document.getElementById("storyInput");
-      const startButtonElement = document.getElementById("startButton");
-      const continueButtonElement = document.getElementById("continueButton");
-      const mainPlotButtonElement = document.getElementById("mainPlotButton");
-      const fallingActionButtonElement = document.getElementById("fallingActionButton");
-      const conclusionButtonElement = document.getElementById("conclusionButton");
-      const storyBoxElement = document.getElementById("storyBox");
-      const continueStoryBoxElement = document.getElementById("continueStoryBox");
-      const mainPlotBoxElement = document.getElementById("mainPlotBox");
-      const fallingActionBoxElement = document.getElementById("fallingActionBox");
-      const conclusionBoxElement = document.getElementById("conclusionBox");
+<script>
+async function startStory() {
+    const input = encodeURIComponent(document.getElementById('storyInput').value);
+    const response = await fetch(`/api/story?prompt=${input}&direction=Provide an exposition of the story.`);
+    const data = await response.json();
+    if (data.error) {
+        displayError(data.error);
+    } else {
+        displayPart(data, 'exposition');
+    }
+}
 
-      startButtonElement.addEventListener("click", () => {
-        const storyStart = storyInputElement.value;
-        fetchStoryline(storyStart, "", true, continueButtonElement, storyBoxElement);
-        storyInputElement.value = "";
-      });
+function displayPart(data, section) {
+    const output = document.getElementById('storyOutput');
+    let storyHtml = `<p>${data.story}</p>`;
+    if (data.choices.length > 0) {
+        const choicesHtml = data.choices.map((choice, index) =>
+            `<button onclick="choosePath('${choice}', '${section}')">Option ${String.fromCharCode(65 + index)}: ${choice}</button>`
+        ).join(' ');
+        storyHtml += choicesHtml;
+    } else {
+        storyHtml += "<p>No options available to continue the story. Check if the story part is supposed to end here or not.</p>"; // Fallback message
+    }
+    output.innerHTML = output.innerHTML + "<br>" + storyHtml; // Ensure separation between story parts
+}
 
-      continueButtonElement.addEventListener("click", () => {
-        const currentStory = document.querySelector(".story-part").innerText;
-        fetchStoryline(currentStory, "Continue with the rising action.", false, mainPlotButtonElement, continueStoryBoxElement);
-      });
+function displayError(message) {
+    const output = document.getElementById('storyOutput');
+    output.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
+}
 
-      mainPlotButtonElement.addEventListener("click", () => {
-        const currentStory = continueStoryBoxElement.innerText;
-        fetchStoryline(currentStory, "Continue with the main plot events.", false, fallingActionButtonElement, mainPlotBoxElement);
-      });
+async function choosePath(choice, section) {
+    const nextSection = determineNextSection(section);
+    const prompt = encodeURIComponent(choice);  // Use choice to influence the next part of the story
+    const response = await fetch(`/api/story?prompt=${prompt}&direction=${nextSection}`);
+    const data = await response.json();
+    if (data.error) {
+        displayError(data.error);
+    } else {
+        displayPart(data, nextSection);
+    }
+}
 
-      fallingActionButtonElement.addEventListener("click", () => {
-        const currentStory = mainPlotBoxElement.innerText;
-        fetchStoryline(currentStory, "Continue with the falling action.", false, conclusionButtonElement, fallingActionBoxElement);
-      });
-
-      conclusionButtonElement.addEventListener("click", () => {
-        const currentStory = fallingActionBoxElement.innerText;
-        fetchStoryline(currentStory, "Provide the conclusion.", false, null, conclusionBoxElement);
-      });
-
-      function fetchStoryline(story, direction, isFirstCall, nextButtonElement, targetElement) {
-        const url = `/api/story?prompt=${encodeURIComponent(story)}&direction=${encodeURIComponent(direction)}`;
-        fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          const storyPartElement = document.createElement("div");
-          storyPartElement.className = "story-part";
-          storyPartElement.innerText = data.story;
-          targetElement.appendChild(storyPartElement);
-          if (nextButtonElement) {
-            nextButtonElement.style.display = "block"; // Show the next stage button
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert("Failed to load the story. Please check the console for more details.");
-        });
-      }
-    </script>
+function determineNextSection(currentSection) {
+    switch (currentSection) {
+        case 'exposition': return 'Continue with the rising action.';
+        case 'rising action': return 'Continue with the main plot events.';
+        case 'main plot events': return 'Continue with the falling action.';
+        case 'falling action': return 'Provide the conclusion.';
+        default: return 'Provide an exposition of the story.'; // Cycles back to start if needed
+    }
+}
+</script>
 </body>
 </html>

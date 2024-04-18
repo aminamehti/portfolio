@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { gptPrompt } from "./shared/openai.js";
+import { gptPrompt } from "./shared/openai.ts";
 import { createExitSignal, staticServer } from "./shared/server.ts";
 
 import { Chalk } from "npm:chalk@5";

@@ -1,4 +1,4 @@
-import { gptPrompt } from "../shared/openai.js";
+import { gptPrompt } from "../shared/openai.ts";
 import { ask, say } from "../shared/cli.js";
 import chalk from "npm:chalk@5.3.0";
 import boxen from "https://esm.sh/boxen@6";

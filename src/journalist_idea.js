@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { gptPrompt } from "./shared/openai.js"; // Ensure this module exists and is correctly implemented
+import { gptPrompt } from "./shared/openai.ts"; // Ensure this module exists and is correctly implemented
 import { createExitSignal, staticServer } from "./shared/server.ts"; // These functions/modules should exist as per your structure
 
 import { Chalk } from "npm:chalk@5";
