@@ -30,34 +30,29 @@ router.get("/api/story", async (ctx) => {
   }
 });
 
-// Function to create prompts including the last choice
 function generatePrompt(prompt, direction, lastChoice) {
   const basePrompt = `Continue the story based on the information below and ensure to maintain the character names and continuity.`;
   const choiceInstruction = lastChoice ? ` Consider the choice made previously: '${lastChoice}'.` : "";
   const storyConsistency = " Please keep the main character's name and key details consistent throughout the story.";
 
+  // Adjusted to handle only Start, Middle, and End parts of the story
   switch (direction) {
-      case "Continue with the rising action.":
-          return `${basePrompt} ${prompt}${choiceInstruction} Develop the rising action. This part should end with two distinct options for the character, labeled as Option A and Option B.${storyConsistency}`;
-      case "Continue with the main plot events.":
-          return `${basePrompt} ${prompt}${choiceInstruction} Focus on the main events of the plot. Conclude this part with two new choices for the character, clearly labeled as Option A and Option B.${storyConsistency}`;
-      case "Continue with the falling action.":
-          return `${basePrompt} ${prompt}${choiceInstruction} Now move on to the falling action. Ensure this segment also ends with two choices for the character, each labeled as Option A or Option B.${storyConsistency}`;
-      case "Provide the conclusion.":
-          return `${basePrompt} ${prompt}${choiceInstruction} Finally, provide a satisfying conclusion to the story. Reflect on the choices made previously to deliver a coherent ending.${storyConsistency}`;
+      case "Middle":
+          return `${basePrompt} ${prompt}${choiceInstruction} Develop the story. This part should end with two distinct options for the character, labeled as Option A and Option B.${storyConsistency}`;
+      case "End":
+          return `${basePrompt} ${prompt}${choiceInstruction} Conclude the story. Reflect on the choices made previously to deliver a coherent ending. No further options.${storyConsistency}`;
       default:
-          // This will handle the exposition and any other unspecified part of the story
+          // Treats any other input as the start of the story
           return `${basePrompt} ${prompt}${choiceInstruction} Start the story by introducing the main character and setting up the initial situation. Finish this part with two options for the character, labeled as Option A and Option B.${storyConsistency}`;
   }
 }
 
-// Function to parse choices from the story text
 function parseChoices(story) {
   const choicePattern = /Option (A|B): ([^\.]+)\./g;
   const choices = [];
   let match;
   while ((match = choicePattern.exec(story)) !== null) {
-    choices.push(match[2].trim());
+    choices.push({option: match[1], description: match[2].trim()});
   }
   return choices;
 }
