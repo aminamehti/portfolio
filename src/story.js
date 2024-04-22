@@ -45,12 +45,12 @@ function generatePrompt(prompt, direction, lastChoice) {
 
   switch (direction) {
     case "Middle":
-      return `${basePrompt}${choiceInstruction} ${prompt} Now, develop the story further. This part should elaborate on the implications of the previous choice and end with two distinct options for the character, labeled as Option A and Option B.${storyConsistency} Do not bold any text in your response.`;
+      return `${basePrompt}${choiceInstruction} ${prompt} Now, develop the story further. This part should elaborate on the implications of the previous choice and end with two distinct options for the character, labeled as Option A and Option B.${storyConsistency} DO NOT BOLD ANY TEXT IN THE STORY. Limit response to 200 words.`;
     case "End":
-      return `${basePrompt}${choiceInstruction} ${prompt} Now, bring the story to a conclusion. Reflect on the entire journey, especially considering the choices made previously, to deliver a coherent and satisfying ending. No further options.${storyConsistency} Do not bold any text in your response.`;
+      return `${basePrompt}${choiceInstruction} ${prompt} Now, bring the story to a conclusion. Reflect on the entire journey, especially considering the choices made previously, to deliver a coherent and satisfying ending. No further options.${storyConsistency} DO NOT BOLD ANY TEXT IN THE STORY. Limit response to 200 words.`;
     default:
       // This handles the "Start" of the story and any other unspecified part
-      return `${basePrompt} ${prompt}${choiceInstruction} Begin by introducing the main character and setting up the initial situation. Finish this part with two options for the character, labeled as Option A and Option B.${storyConsistency} Do not bold any text in your response.`;
+      return `${basePrompt} ${prompt}${choiceInstruction} Begin by introducing the main character and setting up the initial situation. Finish this part with two options for the character, labeled as Option A and Option B.${storyConsistency} DO NOT BOLD ANY TEXT IN THE STORY. Limit response to 200 words.`;
   }
 }
 
