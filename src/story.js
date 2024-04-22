@@ -4,9 +4,9 @@ import * as log from "./shared/logger.ts";
 import { createExitSignal, staticServer } from "./shared/server.ts";
 log.setLogLevel(log.LogLevel.DEBUG);
 
-import { Chalk } from "npm:chalk@5";
-const chalk = new Chalk({ level: 1 });
-
+//import { Chalk } from "npm:chalk@5";
+//const chalk = new Chalk({ level: 1 });
+console.log(`Current working directory is: ${Deno.cwd()}`);
 const app = new Application();
 const router = new Router();
 
@@ -78,5 +78,5 @@ app.use(async (ctx, next) => {
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-console.log(chalk.green("Listening on http://localhost:8000"));
+console.log("Listening on http://localhost:8000");
 await app.listen({ port: 8000, signal: createExitSignal() });

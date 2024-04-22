@@ -1,0 +1,10 @@
+{
+  "deploy": {
+    "project": "daec1a0a-d568-40bd-898c-3605f900ab12",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "story.js"
+  }
+}
