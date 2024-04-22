@@ -15,60 +15,52 @@
 <input type="text" id="storyInput" placeholder="Start typing..." size="50">
 <button onclick="startStory()">Generate Story</button>
 <div id="storyOutput"></div>
-
 <script>
-async function startStory() {
-    const input = encodeURIComponent(document.getElementById('storyInput').value);
-    const response = await fetch(`/api/story?prompt=${input}&direction=Start`);
-    const data = await response.json();
-    if (data.error) {
-        displayError(data.error);
-    } else {
-        displayPart(data, 'Start');
+    async function startStory() {
+        const input = encodeURIComponent(document.getElementById('storyInput').value);
+        const response = await fetch(`/api/story?prompt=${input}&direction=Start`);
+        const data = await response.json();
+        if (data.error) {
+            displayError(data.error);
+        } else {
+            displayPart(data, 'Start');
+        }
     }
-}
-
-function displayPart(data, section) {
-    const output = document.getElementById('storyOutput');
-    let storyHtml = `<p>${data.story}</p>`;
-    if (data.choices.length > 0) {
-        // Use `choice.description` to display the text for each option
-        const choicesHtml = data.choices.map((choice, index) =>
-            `<button onclick="choosePath('${choice.description}', '${section}')">Option ${String.fromCharCode(65 + index)}: ${choice.description}</button>`
-        ).join(' ');
-        storyHtml += choicesHtml;
-    } else {
-        storyHtml += "<p>No options available to continue the story. Check if the story part is supposed to end here or not.</p>";
+    
+    function displayPart(data, section) {
+        const output = document.getElementById('storyOutput');
+        let storyHtml = `<p>${data.story}</p>`;
+        if (data.choices.length > 0) {
+            const choicesHtml = data.choices.map((choice, index) =>
+                `<button onclick="choosePath('${choice.description}', '${section}')">Option ${String.fromCharCode(65 + index)}: ${choice.description}</button>`
+            ).join(' ');
+            storyHtml += choicesHtml;
+        } else {
+            storyHtml += "<p>No options available to continue the story. Check the story structure and formatting.</p>";
+        }
+        output.innerHTML = output.innerHTML + "<br>" + storyHtml;
     }
-    output.innerHTML = output.innerHTML + "<br>" + storyHtml; // Ensure separation between story parts
-}
 
-function displayError(message) {
-    const output = document.getElementById('storyOutput');
-    output.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
-}
-
-async function choosePath(choice, section) {
-    const nextSection = determineNextSection(section);
-    const prompt = encodeURIComponent(document.getElementById('storyInput').value);
-    const lastChoice = encodeURIComponent(choice);  // This might need adjustments if the backend requires a different format
-    const response = await fetch(`/api/story?prompt=${prompt}&direction=${nextSection}&lastChoice=${lastChoice}`);
-    const data = await response.json();
-    if (data.error) {
-        displayError(data.error);
-    } else {
-        displayPart(data, nextSection);
+    async function choosePath(choice, section) {
+        const nextSection = determineNextSection(section);
+        const prompt = encodeURIComponent(document.getElementById('storyInput').value);
+        const response = await fetch(`/api/story?prompt=${prompt}&direction=${nextSection}&choice=${encodeURIComponent(choice)}`);
+        const data = await response.json();
+        if (data.error) {
+            displayError(data.error);
+        } else {
+            displayPart(data, nextSection);
+        }
     }
-}
 
-function determineNextSection(currentSection) {
-    switch (currentSection) {
-        case 'Start': return 'Middle';
-        case 'Middle': return 'End';
-        case 'End': return 'Start';  // This line can be adjusted if you do not want the story to loop
-        default: return 'Start';
+    function determineNextSection(currentSection) {
+        switch (currentSection) {
+            case 'Start': return 'Middle';
+            case 'Middle': return 'End';
+            case 'End': return 'Start';  // Optionally loop back to start
+            default: return 'Start';
+        }
     }
-}
 </script>
 </body>
 </html>
