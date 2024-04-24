@@ -7,6 +7,19 @@
     body { font-family: Arial, sans-serif; }
     #storyOutput { margin-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #ccc; }
     button { margin-right: 10px; }
+    /* Styles for the loading spinner */
+    .loader {
+        border: 4px solid #f3f3f3; /* Light grey */
+        border-top: 4px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 </head>
 <body>
@@ -15,41 +28,63 @@
 <input type="text" id="storyInput" placeholder="Start typing..." size="50">
 <button onclick="startStory()">Generate Story</button>
 <div id="storyOutput"></div>
+<!-- Loader element, initially hidden -->
+<div id="loader" class="loader" style="display: none;"></div>
+
 <script>
     async function startStory() {
+        displayLoader(true);  // Show loader
         const input = encodeURIComponent(document.getElementById('storyInput').value);
-        const response = await fetch(`/api/story?prompt=${input}&direction=Start`);
-        const data = await response.json();
-        if (data.error) {
-            displayError(data.error);
-        } else {
-            displayPart(data, 'Start');
+        try {
+            const response = await fetch(`/api/story?prompt=${input}&direction=Start`);
+            const data = await response.json();
+            if (data.error) {
+                displayError(data.error);
+            } else {
+                displayPart(data, 'Start');
+            }
+        } finally {
+            displayLoader(false);  // Hide loader regardless of success or error
         }
     }
-    
+
     function displayPart(data, section) {
         const output = document.getElementById('storyOutput');
-        let storyHtml = `<p>${data.story}</p>`;
+        output.innerHTML = ''; // Clear previous content
+        const storyParagraph = document.createElement('p');
+        storyParagraph.textContent = data.story;
+        output.appendChild(storyParagraph);
+
         if (data.choices.length > 0) {
-            const choicesHtml = data.choices.map((choice, index) =>
-                `<button onclick="choosePath('${choice.description}', '${section}')">Option ${String.fromCharCode(65 + index)}: ${choice.description}</button>`
-            ).join(' ');
-            storyHtml += choicesHtml;
+            data.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.textContent = `Option ${String.fromCharCode(65 + index)}: ${choice.description}`;
+                button.addEventListener('click', () => choosePath(choice.description, section));
+                output.appendChild(button);
+            });
         } else {
-            storyHtml += "<p>You have come to the end of this tale. Refresh the page for another story.</p>";
+            const endParagraph = document.createElement('p');
+            endParagraph.textContent = "You have come to the end of this tale. Refresh the page for another story.";
+            output.appendChild(endParagraph);
         }
-        output.innerHTML = output.innerHTML + "<br>" + storyHtml;
+        // Add a break line before appending new content
+        output.appendChild(document.createElement('br'));
     }
 
     async function choosePath(choice, section) {
+        displayLoader(true);  // Show loader
         const nextSection = determineNextSection(section);
         const prompt = encodeURIComponent(document.getElementById('storyInput').value);
-        const response = await fetch(`/api/story?prompt=${prompt}&direction=${nextSection}&choice=${encodeURIComponent(choice)}`);
-        const data = await response.json();
-        if (data.error) {
-            displayError(data.error);
-        } else {
-            displayPart(data, nextSection);
+        try {
+            const response = await fetch(`/api/story?prompt=${prompt}&direction=${nextSection}&choice=${encodeURIComponent(choice)}`);
+            const data = await response.json();
+            if (data.error) {
+                displayError(data.error);
+            } else {
+                displayPart(data, nextSection);
+            }
+        } finally {
+            displayLoader(false);  // Hide loader regardless of success or error
         }
     }
 
@@ -60,6 +95,10 @@
             case 'End': return 'Start';  // Optionally loop back to start
             default: return 'Start';
         }
+    }
+
+    function displayLoader(display) {
+        document.getElementById('loader').style.display = display ? 'block' : 'none';
     }
 </script>
 </body>
