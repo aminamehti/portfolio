@@ -66,6 +66,11 @@
                      -1px 1px 0 #000,
                       2px 2px 0 #000; /* Add black outline */
     }
+
+    p.end-text {
+        font-style: italic;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
@@ -112,6 +117,7 @@
         } else {
             const endParagraph = document.createElement('p');
             endParagraph.textContent = "You have come to the end of this tale. Refresh the page for another story.";
+            endParagraph.classList.add('end-text'); // Add class to style the text
             output.appendChild(endParagraph);
         }
     }
