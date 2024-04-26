@@ -100,27 +100,34 @@
     }
 
     function displayPart(data, section) {
-        const output = document.getElementById('storyOutput');
-        output.innerHTML = '';
-        output.style.display = 'block'; // Reset display to default
-        const storyParagraph = document.createElement('p');
-        storyParagraph.textContent = data.story;
-        output.appendChild(storyParagraph);
+    const output = document.getElementById('storyOutput');
+    output.innerHTML = ''; // Clear previous content
+    output.style.display = 'block'; // Reset display to default
 
-        if (data.choices.length > 0) {
-            data.choices.forEach((choice, index) => {
-                const button = document.createElement('button');
-                button.textContent = `Option ${String.fromCharCode(65 + index)}: ${choice.description}`;
-                button.addEventListener('click', function() { choosePath(choice.description, section); });
-                output.appendChild(button);
-            });
-        } else {
-            const endParagraph = document.createElement('p');
-            endParagraph.textContent = "You have come to the end of this tale. Refresh the page for another story.";
-            endParagraph.classList.add('end-text'); // Add class to style the text
-            output.appendChild(endParagraph);
+    // Split the story text on new lines and create a paragraph for each part
+    const paragraphs = data.story.split('\n');
+    paragraphs.forEach(paragraphText => {
+        if (paragraphText.trim() !== '') {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = paragraphText;
+            output.appendChild(paragraph);
         }
+    });
+
+    if (data.choices.length > 0) {
+        data.choices.forEach((choice, index) => {
+            const button = document.createElement('button');
+            button.textContent = `Option ${String.fromCharCode(65 + index)}: ${choice.description}`;
+            button.addEventListener('click', function() { choosePath(choice.description, section); });
+            output.appendChild(button);
+        });
+    } else {
+        const endParagraph = document.createElement('p');
+        endParagraph.textContent = "You have come to the end of this tale. Refresh the page for another story.";
+        endParagraph.classList.add('end-text'); // Add class to style the text
+        output.appendChild(endParagraph);
     }
+}
 
     async function choosePath(choice, section) {
         displayLoader(true);
